@@ -1,1 +1,1 @@
-{"short_name": "ATL03", "spatial_extent": [19, 59, 32, 69], "date_range": ["2018-11-26", "2018-11-26"]}
+{"short_name": "ATL03", "spatial_extent": [19, 59, 32, 69], "date_range": ["2018-11-26", "2018-11-26"], "len_granules": 2, "granules_IDs": ["ATL03_20181126113908_08990102_006_02.h5", "ATL03_20181126114738_08990103_006_02.h5"]}

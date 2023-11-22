@@ -1,11 +1,7 @@
 import icepyx as ipx
 import json
-import matplotlib.pyplot as plt
-import folium
 from shapely.geometry import Polygon
 import numpy as np
-import geopandas as gpd
-from IPython.display import IFrame
 from ipyleaflet import Map, Rectangle, Polygon, WidgetControl
 from IPython.display import display, HTML
 import ipywidgets as widgets
@@ -26,21 +22,22 @@ center_lon = (lower_left_lon + upper_right_lon) / 2
 region_a = ipx.Query(short_name, spatial_extent, date_range)
 
 len_granules = len(region_a.avail_granules(ids=True)[0])
+# Convert len_granules to a regular Python list
+len_granules_list = len_granules.tolist() if isinstance(len_granules, np.ndarray) else len_granules
+# Convert len_granules to a regular Python list
+len_granules_list = len_granules.tolist() if isinstance(len_granules, np.ndarray) else len_granules
+
 
 granules_dict = {}
+granules_IDs = np.zeros(len_granules, dtype='U50')
 for i in range(len_granules):
+    granules_IDs[i] = region_a.granules.avail[i]['producer_granule_id']
     polygon = region_a.granules.avail[i]['polygons']
     polygon_string = polygon[0][0]
     # Split the string into individual coordinate values
     coordinates = polygon_string.split()
     polygon_coordinates = [(float(coordinates[j]), float(coordinates[j + 1])) for j in range(0, len(coordinates), 2)]
     granules_dict[f"Granule_{i + 1}"] = polygon_coordinates
-
-
-
-
-
-
 
 # Generate colors using the 'viridis' colormap
 colormap = cm.get_cmap('rainbow', len_granules)
@@ -72,7 +69,7 @@ for k, granule_color in enumerate(granule_colors):
     m.add_layer(granule_polygon)
 
     # Add legend entry with margins
-    legend_html += f'<div style="margin-left: 10px; margin-right: 10px;"><span style="color: {granule_color}; font-weight: bold;">&#9632;</span> Granule {k + 1}</div>'
+    legend_html += f'<div style="margin-left: 10px; margin-right: 10px;"><span style="color: {granule_color}; font-weight: bold;">&#9632;</span> Granule {k + 1}: {granules_IDs[k]} </div>'
 
 # Create a widget for the legend
 legend_widget = widgets.HTML(value=legend_html)
@@ -83,6 +80,20 @@ m.add_control(legend_control)
 
 # Display the map
 display(m)
+
+
+# Assuming granules_IDs is a NumPy array, convert it to a Python list
+granules_IDs_list = granules_IDs.tolist() if isinstance(granules_IDs, np.ndarray) else granules_IDs
+
+
+with open('variables.json', 'r') as json_file:
+    variables = json.load(json_file)
+
+variables['len_granules'] = len_granules_list
+variables['granules_IDs'] = granules_IDs_list
+
+with open('variables.json', 'w') as json_file:
+    json.dump(variables, json_file)
 
 
 
