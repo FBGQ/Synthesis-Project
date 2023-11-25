@@ -1,9 +1,5 @@
-import h5py
-import scipy
-from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import json
 from scipy.spatial import cKDTree
 from IPython.display import clear_output
@@ -61,8 +57,10 @@ plt.figure(figsize=(15, 5))
 plt.plot(canopy_flag_dist[quality_flag == 1], canopy_flag[quality_flag == 1], '.', color='red', markersize=5)
 plt.plot(canopy_flag_dist[quality_flag == 2], canopy_flag[quality_flag == 2], 'x', color='blue', markersize=5)
 plt.plot(canopy_flag_dist[quality_flag == 3], canopy_flag[quality_flag == 3], '^', color='gray', markersize=5)
-plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height [m]')
+plt.title('Canopy detection with quality flags')
+plt.legend(['Quality flag = 1', 'Quality flag = 2', 'Quality flag = 3'])
 plt.ylim(above_ground_ph.min() -10, above_ground_ph.max() + 10)
 plt.grid()
 plt.show()
@@ -145,11 +143,12 @@ shifted_h_max_dist = valid_h_max_dist + offset
 
 # Plot the max height for each segment
 plt.figure(figsize=(15, 5))
+plt.title('Max canopy height for each segment')
 plt.plot(dist_m, photon_h, '.', color='gray', markersize=1.2)
 plt.plot(shifted_h_max_dist, valid_ground_mean, '.', color='blue', markersize=5)
 plt.plot(shifted_h_max_dist, valid_h_max, '.', color='red', markersize=5)
-plt.xlabel('Distance')
-plt.ylabel('Max Height')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height')
 plt.ylim(valid_ground_mean.min() - 10, varPlot_h_max.max() + 10)
 plt.grid()
 plt.show()

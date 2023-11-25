@@ -1,6 +1,5 @@
 import json
 import h5py
-import scipy
 from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
@@ -59,7 +58,8 @@ plt.plot(shifted_h_max_dist, valid_ground_mean, '.', color='blue', markersize=8)
 plt.ylim(valid_ground_mean.min() - 10, varPlot_h_max.max() + 10)
 plt.legend(['ATL03 Photon Cloud','ATL08 - Canopy', 'ATL08 - Ground', 'Estimated Canopy', 'Estimated Ground'])
 plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
+plt.ylabel('Photon Height [m]')
+plt.title('Comparison between estimated height with original ATL08 product')
 plt.grid()
 plt.show()
 

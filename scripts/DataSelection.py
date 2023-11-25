@@ -6,7 +6,9 @@ from ipyleaflet import Map, Rectangle, Polygon, WidgetControl
 from IPython.display import display, HTML
 import ipywidgets as widgets
 import matplotlib.cm as cm
+from IPython.display import clear_output
 
+clear_output()
 
 with open('variables.json') as json_file:
     variables = json.load(json_file)

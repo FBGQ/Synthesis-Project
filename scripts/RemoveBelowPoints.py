@@ -60,14 +60,6 @@ for i in range(len(ground_ph_temp) - 1):
 # plot filtered data
 filtered_data = np.array(filtered_data)
 
-plt.figure(figsize=(15, 5))
-plt.plot(filtered_data[:, 0], filtered_data[:, 1], '.', color='green', markersize=1.2)
-plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
-plt.ylim(ground_ph_temp.min() - 10, ground_ph_temp.max() + 10)
-plt.grid()
-plt.show()
-
 above_ground_ph = filtered_data[:, 1]
 above_ground_dist_m = filtered_data[:, 0]
 
@@ -82,9 +74,10 @@ std_dev_ph = np.std(above_ground_ph)
 # plot above ground data
 plt.figure(figsize=(15, 5))
 plt.plot(above_ground_dist_m, above_ground_ph, '.', color='green', markersize=1.2)
-plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height [m]')
 plt.ylim(above_ground_ph.min() - 10, median_plt + std_dev_ph)
+plt.title('Photons above ground')
 plt.grid()
 plt.show()
 

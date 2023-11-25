@@ -89,17 +89,17 @@ while(1):
 # plot new ground_ph
 
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(15, 5))
-fig.suptitle('Vertically stacked subplots')
+fig.suptitle('Comparison before and after removing outliers')
 
 ax1.plot(kept_dist_m_values, ground_ph, '.', color='green', markersize=1.2)
 ax1.set_ylim(ground_ph.min() - 10, ground_ph.max() + 10)
-ax1.set_ylabel('photon_h')  # Set the y-axis label for ax1
+ax1.set_ylabel('Photon Height [m]')  # Set the y-axis label for ax1
 ax1.grid()
 
 ax2.plot(kept_dist_m_values_temp, ground_ph_temp, '.', color='green', markersize=1.2)
 ax2.set_ylim(ground_ph_temp.min() - 10, ground_ph_temp.max() + 10)
-ax2.set_xlabel('dist [m]')  # Set the x-axis label for ax2
-ax2.set_ylabel('photon_h')  # Set the y-axis label for ax2
+ax2.set_xlabel('Distance [m]')  # Set the x-axis label for ax2
+ax2.set_ylabel('Photon Height [m]')  # Set the y-axis label for ax2
 ax2.grid()
 
 plt.show()
@@ -108,9 +108,11 @@ plt.show()
 plt.figure(figsize=(15, 5))
 plt.plot(dist_m, photon_h, '.', color='green', markersize=1.2)
 plt.plot(kept_dist_m_values_temp, ground_ph_temp, '.', color='red', markersize=1.2)
-plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
+plt.title('Ground detection')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height [m]')
 plt.ylim(ground_ph_temp.min() -10, ground_ph_temp.max() + 10)
+plt.legend(['All photons', 'Ground photons'])
 plt.grid()
 plt.show()
 

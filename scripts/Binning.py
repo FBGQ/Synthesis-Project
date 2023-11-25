@@ -1,9 +1,7 @@
 import h5py
-import scipy
 from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import json
 
 
@@ -23,8 +21,9 @@ dist = delta_time * 7.2
 
 plt.figure(figsize=(15, 5))
 plt.plot(dist * 1000, photon_h, '.', color='green', markersize=1.2)
-plt.xlabel('distance [m]')
-plt.ylabel('Photon height [m]')
+plt.title('Original ATL03 data')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height [m]')
 plt.grid()
 plt.show()
 
@@ -119,10 +118,10 @@ for i in range(len(binx) - 1):
 
 plt.figure(figsize=(15, 5))
 plt.plot(kept_dist_m_values, ground_ph, '.', color='green', markersize=1.2)
-plt.xlabel('dist [m]')
-plt.ylabel('photon_h')
+plt.xlabel('Distance [m]')
+plt.ylabel('Photon Height [m]')
 plt.ylim(ground_ph.min() -10, ground_ph.max() + 10)
-
+plt.title('Photons identified as ground photons')
 plt.grid()
 plt.show()
 
