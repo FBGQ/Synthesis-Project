@@ -7,6 +7,7 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 import matplotlib.cm as cm
 
+
 with open('variables.json') as json_file:
     variables = json.load(json_file)
 
@@ -22,22 +23,34 @@ center_lon = (lower_left_lon + upper_right_lon) / 2
 region_a = ipx.Query(short_name, spatial_extent, date_range)
 
 len_granules = len(region_a.avail_granules(ids=True)[0])
+
 # Convert len_granules to a regular Python list
 len_granules_list = len_granules.tolist() if isinstance(len_granules, np.ndarray) else len_granules
 # Convert len_granules to a regular Python list
 len_granules_list = len_granules.tolist() if isinstance(len_granules, np.ndarray) else len_granules
 
+time_start = np.zeros(len_granules, dtype='U50')
+time_end = np.zeros(len_granules, dtype='U50')
 
 granules_dict = {}
 granules_IDs = np.zeros(len_granules, dtype='U50')
 for i in range(len_granules):
     granules_IDs[i] = region_a.granules.avail[i]['producer_granule_id']
+    time_start[i] = region_a.granules.avail[i]['time_start']
+    time_end[i] = region_a.granules.avail[i]['time_end']
     polygon = region_a.granules.avail[i]['polygons']
     polygon_string = polygon[0][0]
     # Split the string into individual coordinate values
     coordinates = polygon_string.split()
     polygon_coordinates = [(float(coordinates[j]), float(coordinates[j + 1])) for j in range(0, len(coordinates), 2)]
     granules_dict[f"Granule_{i + 1}"] = polygon_coordinates
+
+
+for i in range(len_granules):
+    time_start[i] = int((time_start[i][11:13]) + (time_start[i][14:16]) + (time_start[i][17:19]))
+    time_end[i] = int((time_end[i][11:13]) + (time_end[i][14:16]) + (time_end[i][17:19]))
+
+
 
 # Generate colors using the 'viridis' colormap
 colormap = cm.get_cmap('rainbow', len_granules)
@@ -71,8 +84,11 @@ for k, granule_color in enumerate(granule_colors):
     # Add legend entry with margins
     legend_html += f'<div style="margin-left: 10px; margin-right: 10px;"><span style="color: {granule_color}; font-weight: bold;">&#9632;</span> Granule {k + 1}: {granules_IDs[k]} </div>'
 
-# Create a widget for the legend
-legend_widget = widgets.HTML(value=legend_html)
+# Create a widget for the legend with fixed height and scrollable overflow
+# Increase the size of the legend box
+legend_widget = widgets.HTML(
+    value=f'<div style="max-height: 300px; overflow-y: auto;">{legend_html}</div>'
+)
 
 # Create a control for the legend
 legend_control = WidgetControl(widget=legend_widget, position='topright')
@@ -84,6 +100,8 @@ display(m)
 
 # Assuming granules_IDs is a NumPy array, convert it to a Python list
 granules_IDs_list = granules_IDs.tolist() if isinstance(granules_IDs, np.ndarray) else granules_IDs
+time_start_list = time_start.tolist() if isinstance(time_start, np.ndarray) else time_start
+time_end_list = time_end.tolist() if isinstance(time_end, np.ndarray) else time_end
 
 
 with open('variables.json', 'r') as json_file:
@@ -91,6 +109,8 @@ with open('variables.json', 'r') as json_file:
 
 variables['len_granules'] = len_granules_list
 variables['granules_IDs'] = granules_IDs_list
+variables['time_start'] = time_start_list
+variables['time_end'] = time_end_list
 
 with open('variables.json', 'w') as json_file:
     json.dump(variables, json_file)

@@ -74,8 +74,7 @@ plt.show()
 
 h_max = []
 h_max_dist = []
-
-
+ground_mean = []
 
 for i in range(int(np.floor(canopy_flag_dist.max() / segment))):
     # Define the range for the current segment
@@ -88,49 +87,70 @@ for i in range(int(np.floor(canopy_flag_dist.max() / segment))):
 
     # Max height with user-specified quality flags for the current segment
     selected_flags = np.isin(quality_flag_seg, np.nonzero(user_quality_flags)[0] + 1)
-    if len(canopy_flag_seg[selected_flags]) == 0:
+    canopy_flag_seg_selected = canopy_flag_seg[selected_flags]
+
+    if len(canopy_flag_seg_selected) == 0:
         h_max.append(np.nan)
         h_max_dist.append(segment * i)
-        continue
-    h_max.append(canopy_flag_seg[selected_flags].max())
-    h_max_dist.append(segment * i)
+    else:
+        h_max.append(canopy_flag_seg_selected.max())
+        h_max_dist.append(segment * i)
 
-
-ground_mean = []
-
-for i in range(int(np.floor(canopy_flag_dist.max() / segment))):
-    segment_range = np.logical_and(i * segment <= kept_dist_m_values_temp, kept_dist_m_values_temp <= (i + 1) * segment)
-    kept_dist_m_values_temp_seg = kept_dist_m_values_temp[segment_range]
-    ground_ph_temp_seg = ground_ph_temp[segment_range]
+    # Ground mean for the current segment
+    segment_range_ground = np.logical_and(i * segment <= kept_dist_m_values_temp, kept_dist_m_values_temp <= (i + 1) * segment)
+    kept_dist_m_values_temp_seg = kept_dist_m_values_temp[segment_range_ground]
+    ground_ph_temp_seg = ground_ph_temp[segment_range_ground]
 
     if len(ground_ph_temp_seg) == 0:
         ground_mean.append(np.nan)
-        continue
-    
-    ground_mean.append(np.mean(ground_ph_temp_seg))
+    else:
+        ground_mean.append(np.mean(ground_ph_temp_seg))
 
-    
-
+# Convert lists to NumPy arrays
 h_max = np.array(h_max)
 h_max_dist = np.array(h_max_dist)
-
 ground_mean = np.array(ground_mean)
 
-# Filter out NaN and Inf values from h_max
-valid_h_max = h_max[np.isfinite(h_max)]
-valid_ground_mean = ground_mean[np.isfinite(ground_mean)]
+# Remove NaN values and corresponding distances
+#valid_ground_mean = ground_mean[~np.isnan(ground_mean)]
+#valid_h_max_dist = h_max_dist[~np.isnan(ground_mean)]
+#valid_h_max = h_max[~np.isnan(ground_mean)]
+
+#valid_h_max = valid_h_max[~np.isnan(valid_h_max)]
+#valid_h_max_dist = valid_h_max_dist[~np.isnan(valid_h_max)]
+#valid_ground_mean = valid_ground_mean[~np.isnan(valid_ground_mean)]
+
+# remove values where ground_mean is nan so that we can plot the graph
+valid_ground_mean = []
+valid_h_max_dist = []
+valid_h_max = []
+
+for i in range(len(ground_mean)):
+    if np.isnan(ground_mean[i]):
+        continue
+    else:
+        valid_ground_mean.append(ground_mean[i])
+        valid_h_max_dist.append(h_max_dist[i])
+        valid_h_max.append(h_max[i])
+
+valid_ground_mean = np.array(valid_ground_mean)
+valid_h_max_dist = np.array(valid_h_max_dist)
+valid_h_max = np.array(valid_h_max)
+
+varPlot_h_max = np.array(valid_h_max)
+varPlot_h_max = varPlot_h_max[~np.isnan(varPlot_h_max)]
 
 offset = segment/2  # You can adjust this value based on your preference
-shifted_h_max_dist = h_max_dist + offset
+shifted_h_max_dist = valid_h_max_dist + offset
 
 # Plot the max height for each segment
 plt.figure(figsize=(15, 5))
 plt.plot(dist_m, photon_h, '.', color='gray', markersize=1.2)
-plt.plot(shifted_h_max_dist, ground_mean, '.', color='blue', markersize=5)
-plt.plot(shifted_h_max_dist, h_max, '.', color='red', markersize=5)
+plt.plot(shifted_h_max_dist, valid_ground_mean, '.', color='blue', markersize=5)
+plt.plot(shifted_h_max_dist, valid_h_max, '.', color='red', markersize=5)
 plt.xlabel('Distance')
 plt.ylabel('Max Height')
-plt.ylim(valid_ground_mean.min() - 10, valid_h_max.max() + 10)
+plt.ylim(valid_ground_mean.min() - 10, varPlot_h_max.max() + 10)
 plt.grid()
 plt.show()
 
@@ -144,6 +164,7 @@ variables['ground_mean'] = ground_mean.tolist()
 variables['valid_h_max'] = valid_h_max.tolist()
 variables['valid_ground_mean'] = valid_ground_mean.tolist()
 variables['shifted_h_max_dist'] = shifted_h_max_dist.tolist()
+variables['varPlot_h_max'] = varPlot_h_max.tolist()
 
 with open('variables.json', 'w') as json_file:
     json.dump(variables, json_file)

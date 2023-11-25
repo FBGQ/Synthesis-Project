@@ -123,7 +123,7 @@ def create_hdf5_file(filename):
 
 
 # ----------------------------------- MAIN ----------------------------------- #
-
+in_dir = os.getcwd() + '/download_data/'
 
 
 # Read the variables from the JSON file
@@ -131,9 +131,14 @@ with open("variables.json", "r") as jsonfile:
     variables = json.load(jsonfile)
 
 # Access the variables in the script
-file_name_ATL08 = variables["file_name_ATL08"]
-file_name_ATL03 = variables["file_name_ATL03"]
+filenames = variables["filenames"]
 threshold = variables["threshold"]
+
+
+file_name_ATL03 = filenames[0] 
+print(file_name_ATL03)
+file_name_ATL08 = filenames[1]
+print(file_name_ATL08)
 
 
 # User inputs the beam
@@ -145,7 +150,9 @@ while beam not in ["gt1l", "gt1r", "gt2l", "gt2r", "gt3l", "gt3r"]:
     beam = input("Please enter one of the following options: gt1l, gt1r, gt2l, gt2r, gt3l, gt3r: ")
 
 
-file = h5py.File(file_name_ATL08, 'r')
+
+
+file = h5py.File(in_dir + file_name_ATL08, 'r')
 
 # Read ground data
 
@@ -259,7 +266,7 @@ file.close()
 # Read ATL03 data
 
 filename = file_name_ATL03
-file = h5py.File(filename, 'r')
+file = h5py.File(in_dir + filename, 'r')
 
 photon_h = np.array(file[beam + '/heights/h_ph'])
 delta_time_03 = file[beam +'/heights/delta_time']

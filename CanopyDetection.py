@@ -59,9 +59,7 @@ for i in range(len(ret.statistic)):
     tree = cKDTree(np.c_[above_ground_dist_m, above_ground_ph])
     distances, indices = tree.query([[middle_kd_start_dist, middle_kd_start]], k=20)
 
-    # if last element of distances is larger than 1.5 times the median of the distances, then it is not a tree
-    if np.any(distances > 20):
-        
+    if np.any(distances > 10): 
         continue
     else:
         
