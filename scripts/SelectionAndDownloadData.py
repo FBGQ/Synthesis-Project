@@ -7,6 +7,8 @@ import numpy as np
 
 # User selects which data to download
 
+# -------   1   --------- Load Variables from JSON
+
 with open('variables.json') as json_file:
     variables = json.load(json_file)
 
@@ -19,6 +21,9 @@ time_end = variables['time_end']
 print('The following granules are available for download:', flush=True)
 for i in range(len_granules):
     print("Granule", granules_IDs[i])
+
+
+# -------   2   --------- User selects which granule to download
 
 # loop the input until the user selects a valid granule
 # user insert a number between 1 and len_granules
@@ -59,6 +64,7 @@ version = Gran_ID[34:36]
 
 region_a = ipx.Query(short_name, spatial_extent, cycles = cycle, date_range = [year + '-' + month + '-' + day, year + '-' + month + '-' + day] )
 
+# -------   3   --------- Download confirmation
 
 print('Download the granule(s) (not selected granules will be removed after): ', region_a.avail_granules(ids=True)[0], flush=True)
 print('Do you want to download?', flush=True)
@@ -74,6 +80,8 @@ while (flag == 0):
     else:
         print('Invalid input. Please try again.', flush=True)
 
+
+# -------   4   --------- Folder handling
 
 if os.path.exists('download_data'):
     print('The folder download_data already exists.', flush=True)
@@ -91,13 +99,20 @@ if os.path.exists('download_data'):
     os.system('rm -r download_data')
 
 
+
 if not os.path.exists('download_data'):
     os.makedirs('download_data')
     print('Folder download_data created.', flush=True)
 
+
+# -------   5   --------- Download data
+
 region_a.download_granules(path = 'download_data')
 
 clear_output()
+
+
+# -------   6   --------- Additional data download
 
 short_name = 'ATL08'
 
@@ -111,6 +126,7 @@ for i in range(len_granules):
 region_a.download_granules(path = 'download_data')
 clear_output()
 
+# -------   7   --------- File Cleanup
 
 Gran_ID = 'processed_' + Gran_ID
 
@@ -130,6 +146,8 @@ print('Files in the folder download_data:', flush=True)
 for file in os.listdir('download_data'):
     filenames = np.append(filenames, file)
     print(file, flush=True)
+
+# -------   8   --------- Save Variables to JSON
 
 with open('variables.json', 'r') as json_file:
     variables = json.load(json_file)

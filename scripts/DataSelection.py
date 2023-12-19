@@ -10,6 +10,8 @@ from IPython.display import clear_output
 
 clear_output()
 
+# -------   1   --------- Load Variables from JSON
+
 with open('variables.json') as json_file:
     variables = json.load(json_file)
 
@@ -18,11 +20,19 @@ spatial_extent = variables['spatial_extent']
 date_range = variables['date_range']
 
 lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat = spatial_extent
-# Calculate the center of the bounding box
+
+# -------   2   --------- Calculate the center of the bounding box
+
 center_lat = (lower_left_lat + upper_right_lat) / 2
 center_lon = (lower_left_lon + upper_right_lon) / 2
 
+
+# -------   3   --------- Query ICESat-2 data granules with icepyx
+
 region_a = ipx.Query(short_name, spatial_extent, date_range)
+
+
+# -------   4   --------- Process Granules information
 
 len_granules = len(region_a.avail_granules(ids=True)[0])
 
@@ -54,14 +64,16 @@ for i in range(len_granules):
 
 
 
-# Generate colors using the 'viridis' colormap
+# -------   5   --------- Generate Colors for Granules
+
 colormap = cm.get_cmap('rainbow', len_granules)
 granule_colors_rgba = [colormap(i) for i in np.arange(len_granules) / len_granules]
 
 # Convert RGBA values to HTML color strings
 granule_colors = ['#%02x%02x%02x' % (int(rgba[0] * 255), int(rgba[1] * 255), int(rgba[2] * 255)) for rgba in granule_colors_rgba]
 
-# Create a map centered around the bounding box
+# -------   6   --------- Create a map with the bounding box and granules
+
 m = Map(center=[center_lat, center_lon], zoom=3)
 
 # Add a rectangle to represent the bounding box
@@ -87,7 +99,6 @@ for k, granule_color in enumerate(granule_colors):
     legend_html += f'<div style="margin-left: 10px; margin-right: 10px;"><span style="color: {granule_color}; font-weight: bold;">&#9632;</span> Granule {k + 1}: {granules_IDs[k]} </div>'
 
 # Create a widget for the legend with fixed height and scrollable overflow
-# Increase the size of the legend box
 legend_widget = widgets.HTML(
     value=f'<div style="max-height: 300px; overflow-y: auto;">{legend_html}</div>'
 )
@@ -99,12 +110,14 @@ m.add_control(legend_control)
 # Display the map
 display(m)
 
+# -------   7   --------- Convert all NumPy arrays to Python lists
 
 # Assuming granules_IDs is a NumPy array, convert it to a Python list
 granules_IDs_list = granules_IDs.tolist() if isinstance(granules_IDs, np.ndarray) else granules_IDs
 time_start_list = time_start.tolist() if isinstance(time_start, np.ndarray) else time_start
 time_end_list = time_end.tolist() if isinstance(time_end, np.ndarray) else time_end
 
+# -------   8   --------- Save variables to JSON
 
 with open('variables.json', 'r') as json_file:
     variables = json.load(json_file)

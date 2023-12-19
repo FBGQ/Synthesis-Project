@@ -7,6 +7,9 @@ from IPython.display import clear_output
 def clear_output_notebook():
     clear_output(wait=True)
 
+
+# ----------   1   -------------- Load variables from JSON file
+
 with open('variables.json') as json_file:
     variables = json.load(json_file)
 
@@ -34,6 +37,10 @@ canopy_flag = np.array(canopy_flag)
 kept_dist_m_values_temp = np.array(kept_dist_m_values_temp)
 ground_ph_temp = np.array(ground_ph_temp)
 
+
+# ----------   2   -------------- Quality flag assignment
+
+
 tree = cKDTree(np.c_[canopy_flag_dist, canopy_flag])
 
 quality_flag = np.zeros(len(canopy_flag))  # Initialize quality_flag array
@@ -50,7 +57,8 @@ for i in range(len(canopy_flag)):
     else:
         quality_flag[i] = 3
 
-# Plot the photons with quality_flag = 1
+
+# ----------   3   -------------- Plot Canopy Detection Results with Quality Flags
 
 plt.figure(figsize=(15, 5))
 # plt.plot(above_ground_dist_m, above_ground_ph, '.', color='green', markersize=1)
@@ -67,8 +75,7 @@ plt.show()
 
 
 
-
-# Assuming above_ground_dist_m, above_ground_ph, canopy_flag_dist, canopy_flag, and quality_flag are already defined
+# ----------   4   -------------- Segmented Analysis for Max Canoooy Height and Ground Mean
 
 h_max = []
 h_max_dist = []
@@ -138,7 +145,7 @@ valid_h_max = np.array(valid_h_max)
 varPlot_h_max = np.array(valid_h_max)
 varPlot_h_max = varPlot_h_max[~np.isnan(varPlot_h_max)]
 
-offset = segment/2  # You can adjust this value based on your preference
+offset = segment/2  
 shifted_h_max_dist = valid_h_max_dist + offset
 
 # Plot the max height for each segment
@@ -153,6 +160,8 @@ plt.ylim(valid_ground_mean.min() - 10, varPlot_h_max.max() + 10)
 plt.grid()
 plt.show()
 
+
+# ----------   5   -------------- Save variables to JSON file
 
 with open('variables.json', 'r') as json_file:
     variables = json.load(json_file)

@@ -12,8 +12,7 @@ def clear_output_notebook():
     clear_output(wait=True)
 
 
-interval_ground = 20
-interval_vertical = 8
+# -----------   1   -------------- Load variables from JSON file
 
 with open('variables.json') as json_file:
     variables = json.load(json_file)
@@ -24,12 +23,16 @@ above_ground_ph = variables['above_ground_ph']
 above_ground_dist_m = np.array(above_ground_dist_m)
 above_ground_ph = np.array(above_ground_ph)
 
+
+
+# -----------   2   -------------- Binned Statistics for Canopy Detection
+
+interval_ground = 20
+interval_vertical = 8
+
 #print(dist_m[interval_low:interval_high].min())
 binx = np.arange(above_ground_dist_m.min(),above_ground_dist_m.max(), interval_ground)
 biny = np.arange(above_ground_ph.min(), above_ground_ph.max(), interval_vertical)
-
-#print((binx))
-#print((biny))
 
 ret = stats.binned_statistic_2d(above_ground_dist_m, above_ground_ph, None,statistic='count', bins=[binx, biny])
 
@@ -69,64 +72,40 @@ for i in range(len(ret.statistic)):
 
 
 
-# Plot the canopy_flag
-# plt.figure(figsize=(15, 5))
-# plt.plot(above_ground_dist_m, above_ground_ph, '.', color='green', markersize=1)
-# plt.plot(canopy_flag_dist, canopy_flag, '.', color='red', markersize=1)
-# plt.xlabel('dist [m]')
-# plt.ylabel('photon_h')
-# plt.ylim(above_ground_ph.min() -10, above_ground_ph.max() + 10)
-# plt.grid()
-# plt.show()
-
-
-
 # Now we take an estimate of the tree height
-
 above_ground_dist_m = above_ground_dist_m[above_ground_ph < canopy_flag.max() + 30]
 above_ground_ph = above_ground_ph[above_ground_ph < canopy_flag.max() + 30]
 
-interval_ground = 20
-interval_vertical = 8
 
 #print(dist_m[interval_low:interval_high].min())
 binx = np.arange(above_ground_dist_m.min(),above_ground_dist_m.max(), interval_ground)
 biny = np.arange(above_ground_ph.min(), above_ground_ph.max(), interval_vertical)
 
-#print((binx))
-#print((biny))
-
 ret = stats.binned_statistic_2d(above_ground_dist_m, above_ground_ph, None,statistic='count', bins=[binx, biny])
 
 
 # store the first bin in an array
-
 first_bin = ret.statistic[0,:]
 
 # take the last index that is above the mean
-
 top_fst_bin = np.where(first_bin > np.nanmean(first_bin[first_bin != 0]))[0][-1]
 
-
 # y edges of the top_fst_bin
-
 edge_y0 = biny[top_fst_bin]
 edge_y1 = biny[top_fst_bin + 1]
 
 edge_x0 = binx[0]
 edge_x1 = binx[1]
 
-
 # access above_ground_ph that are in the top_fst_bin
-
 above_ground_ph_top_fst_bin = above_ground_ph[(above_ground_ph >= edge_y0) & (above_ground_ph < edge_y1) & (above_ground_dist_m >= edge_x0) & (above_ground_dist_m <= edge_x1)]
 
-
 # take the point that is in the middle of the top_fst_bin
-
 middle_kd_start = np.median(above_ground_ph_top_fst_bin)
 middle_kd_start_dist = np.median(above_ground_dist_m[(above_ground_ph >= edge_y0) & (above_ground_ph < edge_y1) & (above_ground_dist_m >= edge_x0) & (above_ground_dist_m <= edge_x1)])
 
+
+# --------------   3   -------------- Canopy Detection Filtering
 
 from scipy.spatial import cKDTree
 
@@ -180,6 +159,9 @@ for i in range(len(ret.statistic)):
 clear_output_notebook()
 
 
+
+# -----------   4   -------------- Plot canopy detection results
+
 # Plot the canopy_flag
 plt.figure(figsize=(15, 5))
 plt.plot(above_ground_dist_m, above_ground_ph, '.', color='green', markersize=1)
@@ -192,6 +174,7 @@ plt.legend(['All photons', 'Canopy photons'])
 plt.grid()
 plt.show()
 
+# -----------   5   -------------- Update Variables and Save to JSON File
 
 with open('variables.json', 'r') as json_file:
     variables = json.load(json_file)

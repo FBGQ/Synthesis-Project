@@ -8,7 +8,7 @@ import json
 from scipy.spatial import cKDTree
 import numpy as np
 
-# import variables
+# -------  1  --------- Load Variables from JSON
 
 with open('variables.json') as json_file:
     variables = json.load(json_file)
@@ -18,8 +18,7 @@ ground_ph = variables['ground_ph']
 dist_m = variables['dist_m']
 photon_h = variables['photon_h']
 
-
-# Assuming you have x_centers, y_centers, photon_h, and dist_m defined
+# -------  2  --------- Create KDTree and Query Points
 
 x_centers = kept_dist_m_values
 y_centers = ground_ph
@@ -41,7 +40,7 @@ for i in range(len(x_centers)):
 ground_ph = np.array(filtered_points)[:,0]
 kept_dist_m_values = np.array(filtered_points)[:,1]
 
-# Gaussian smoothing
+# -------  3  --------- Gaussian Smoothing
 
 from scipy.ndimage import gaussian_filter1d
 temp_old = ground_ph  # first step
@@ -86,7 +85,7 @@ while(1):
         
         temp_old = ground_ph_temp
 
-# plot new ground_ph
+# -------  4  --------- Plot Original and Processed Data
 
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(15, 5))
 fig.suptitle('Comparison before and after removing outliers')
@@ -116,7 +115,7 @@ plt.legend(['All photons', 'Ground photons'])
 plt.grid()
 plt.show()
 
-
+# -------  5  --------- Update JSON File
 
 with open('variables.json', 'r') as json_file:
     variables = json.load(json_file)

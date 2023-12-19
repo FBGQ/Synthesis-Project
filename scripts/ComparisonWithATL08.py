@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# -------   1   --------- Read ATL08 data
 
 filename = "chunked_canopy.hdf5"
 file = h5py.File(filename, 'r')
@@ -23,6 +24,9 @@ dist_ATL08 = dist_ATL08 * 1000
 ground_h_ATL08 = ground_h_ATL08[:]
 
 file.close()
+
+
+# -------   2   --------- Read JSON file
 
 with open('variables.json') as json_file:
     variables = json.load(json_file)
@@ -49,6 +53,8 @@ for i in range(len(valid_ground_mean)):
         shifted_h_max_dist[i] = np.nan
 
 
+# -------   3   --------- Plot comparison
+
 plt.figure(figsize=(20, 10))
 plt.plot(dist_m, photon_h, '.', color='gray', markersize=1.2)
 plt.plot(dist_ATL08, ground_h_ATL08 + photon_h_ATL08, 's', color='green', markersize=5)
@@ -64,10 +70,12 @@ plt.grid()
 plt.show()
 
 
+# -------   4   --------- Print means
+
 # Print mean of ATL08 ground_h
 print('Mean of ATL08 ground_h: ', np.nanmean(ground_h_ATL08),'[m]','----', 'Mean of ground_mean: ', np.nanmean(ground_mean),'[m]')
 
 print('\n')
 
 # print mean of ATL08 ground_h + ATL08 canopy_h
-print('Mean of ATL08 canopy_h: ', np.nanmean(ground_h_ATL08 + photon_h_ATL08),'[m]', '----', 'Mean of h_max: ', np.nanmean(h_max),'[m]')
+print('Mean of ATL08 canopy_h: ', np.nanmean(photon_h_ATL08),'[m]', '----', 'Mean of h_max: ', np.nanmean(valid_h_max - valid_ground_mean),'[m]')

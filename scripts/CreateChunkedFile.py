@@ -1,22 +1,21 @@
+# --------------   1    --------------- Import libraries 
+
+
 import h5py
 from datetime import datetime, timedelta
 import PyQt6
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
 from scipy.interpolate import interp1d
-# import cartopy.crs as ccrs
-# from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-# import geopandas as gpd
 from shapely.geometry import Point
 import json
 import os
 from IPython.display import clear_output
 
 
-#  ----------------------------------- FUNCTIONS ----------------------------------- #
+#  -------------  2    --------------- Define Helper functions
 
 def clear_output_notebook():
     clear_output(wait=True)
@@ -36,8 +35,6 @@ def read_ATL08(file_name):
     return photon_h, delta_time
 
 
-
-# FUNCTIONS
 
 def find_consecutive_intervals(arr, threshold):
     """
@@ -119,14 +116,13 @@ def create_hdf5_file(filename):
         ATL_08.create_dataset("ground_h", data=ground_h[start:end])
         ATL_08.create_dataset("dist", data=dist_08[start:end])
 
-    # The file is automatically closed when exiting the 'with' block
 
 
-# ----------------------------------- MAIN ----------------------------------- #
+
 in_dir = os.getcwd() + '/download_data/'
 
+# -------------  3    --------------- Read the variables from the JSON file
 
-# Read the variables from the JSON file
 with open("variables.json", "r") as jsonfile:
     variables = json.load(jsonfile)
 
@@ -141,7 +137,7 @@ file_name_ATL08 = filenames[1]
 print(file_name_ATL08)
 
 
-# User inputs the beam
+# -------------  4    --------------- User Input and Data reading
 
 print("Select the beam you want to use: gt1l, gt1r, gt2l, gt2r, gt3l, gt3r")
 
@@ -150,22 +146,18 @@ while beam not in ["gt1l", "gt1r", "gt2l", "gt2r", "gt3l", "gt3r"]:
     beam = input("Please enter one of the following options: gt1l, gt1r, gt2l, gt2r, gt3l, gt3r: ")
 
 
-
-
 file = h5py.File(in_dir + file_name_ATL08, 'r')
 
-# Read ground data
+# -------------  5    --------------- Data processing and Plotting
 
 ground = file[beam + '/land_segments/terrain/h_te_median']
 ground_h = np.array(ground)
-# To be changed
 ground_h[ground_h>10000] = np.nan
 
 # Read canopy height data
 
 canopy = file[beam + '/land_segments/canopy/h_canopy']
 canopy = np.array(canopy)
-# To be changed
 canopy[canopy > 10000] = np.nan
 
 # Find consecutive intervals
@@ -198,11 +190,7 @@ print("Delta Ground:", np.nanmax(ground_h[intervals[selected_interval][0]:interv
 
 
 
-
-# ----------------------------------- PLOT ----------------------------------- #
-
 # select start and end of the interval
-
 if intervals == None: 
     start = 0
     end = len(canopy) - 1
@@ -233,17 +221,6 @@ for i in range(start, end):
     date_data_can.append(epoch_time + timedelta(seconds=delta_time_08[i]))
 
 dist_08 = (delta_time_08[start:end] - delta_time_08[start]) * 7.2 
-
-# Plot the canopy height
-# plt.figure(figsize=(15, 5))
-# plt.scatter(date_data_can, canopy[start:end] + ground_h[start:end], s=6)
-# plt.scatter(date_data_can, ground_h[start:end], s=6)
-# plt.grid(linestyle='--', linewidth=0.5)
-# plt.title('Canopy Height')
-# plt.legend(['Canopy Height', 'Ground Height'])
-# plt.xlabel('Time')
-# plt.ylabel('Height (m)')
-# plt.show()
 
 # plot the canopy height and the ground height as function of the distance
 plt.figure(figsize=(15, 5))
@@ -283,13 +260,10 @@ lon_03 = np.array(lon_03)
 
 # subtract the first time of ATL08 from the time of ATL03
 delta_time_03_s = delta_time_03 - start_t_08
-
 # find the index of the closest value to 0
 idx_start = (np.abs(delta_time_03_s - 0)).argmin()
 
-# subtract the last time of ATL08 from the time of ATL03
 delta_time_03_e = delta_time_03 - end_t_08
-# find the index of the closest value to 0
 idx_end = (np.abs(delta_time_03_e - 0)).argmin()
 
 
@@ -315,6 +289,10 @@ plt.title('ATL03 and ATL08 products')
 plt.legend(['Photon Height - ATL03', 'Canopy Height - ATL08', 'Ground Height - ATL08'])
 plt.show()
 
+
+# ------------------ 6 ------------------ User Input for Overwriting File
+
+
 while True:
     if os.path.exists('chunked_canopy.hdf5'):
         print("A file with the name chunked_canopy.hdf5 already exists in the folder.")
@@ -335,5 +313,7 @@ while True:
         print("Chunked File containing only the selected interval was created.")
         break 
 
+
+# ------------------ 7 ------------------ Closing file
 
 file.close()

@@ -1,10 +1,10 @@
-import h5py
-import scipy
 from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
+
+# -----------   1   -------------- Load variables from JSON file
 
 with open('variables.json') as json_file:
     variables = json.load(json_file)
@@ -14,25 +14,10 @@ ground_ph_temp = np.array(variables['ground_ph_temp'])
 photon_h = np.array(variables['photon_h'])
 dist_m = np.array(variables['dist_m'])
 
-# Calculate the differences between consecutive points
-differences = np.diff(kept_dist_m_values_temp)
 
-# List to store pairs of indices where differences are bigger than 10
-large_difference_pairs = []
 
-# Iterate through differences and store pairs of indices where difference is bigger than 10
-start_index = None
-for i in range(len(differences)):
-    if differences[i] > 10:
-        if start_index is None:
-            start_index = i
-    elif start_index is not None:
-        large_difference_pairs.append([start_index, i])
-        start_index = None
+# -----------   2   -------------- Filter Photon Data below ground
 
-# If a large difference extends to the end, include it in the pairs
-if start_index is not None:
-    large_difference_pairs.append([start_index, len(differences)])
 
 j = 0
 filtered_data = []
@@ -71,6 +56,9 @@ above_ground_dist_m = above_ground_dist_m[cond]
 median_plt = np.median(above_ground_ph)
 std_dev_ph = np.std(above_ground_ph)
 
+
+# -----------   3   -------------- Plot data
+
 # plot above ground data
 plt.figure(figsize=(15, 5))
 plt.plot(above_ground_dist_m, above_ground_ph, '.', color='green', markersize=1.2)
@@ -81,7 +69,9 @@ plt.title('Photons above ground')
 plt.grid()
 plt.show()
 
-# Update variables and save to JSON file
+
+# -----------   4   -------------- Update Variables and Save to JSON File
+
 variables['above_ground_dist_m'] = above_ground_dist_m.tolist()
 variables['above_ground_ph'] = above_ground_ph.tolist()
 
